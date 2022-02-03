@@ -8,6 +8,7 @@ from nltk import word_tokenize
 from nltk.corpus import stopwords
 from numpy import array
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from sklearn.model_selection import train_test_split
 
 def import_dataset():
   df = pd.read_csv(r'C:\Users\ACER\Documents\SKRIPSI\THIS\Dataset\data.csv',  encoding='latin-1')
@@ -57,11 +58,32 @@ def stemming_data(normalized_text):
           
   return stemmed_text_list
 
+def import_stemmed_dataset():
+  file =  open(r"C:\Users\ACER\Documents\SKRIPSI\THIS\FOR DOSEN\code\deteksi_tweet\api_app\stemmedTextList.txt")
+  lines = file.readlines()
+  lines = [line.rstrip() for line in lines]
+
+  stemmed_text_list = lines
+  return stemmed_text_list
+
+def process_data(dataset, stemmed_text_list):
+  target = dataset['HS']
+
+  for i in range(len(dataset)):
+    if(dataset['HS'][i] == 0 and dataset['Abusive'][i] == 1):
+      target[i] = 2
+      
+  x_train,x_test,y_train,y_test = train_test_split(stemmed_text_list, target, test_size=0.20, random_state=0)
+  return x_train
+
 def main():
-  data_frame = import_dataset()
-  preprocessed_data = preprocess_data(data_frame)
+  dataframe = import_dataset()
+  preprocessed_data = preprocess_data(dataframe)
   normalized_text = normalize_text(preprocessed_data)
-  stemmed_data = stemming_data(normalized_text)
-  print(len(normalized_text))
+  # stemmed_data = stemming_data(normalized_text)
+  stemmed_data = import_stemmed_dataset()
+  result = process_data(dataframe, stemmed_data)
+  print(len(result))
+  
 
 main()
