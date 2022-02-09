@@ -68,7 +68,7 @@ def train_model(request):
       
       
     except ModelResult.DoesNotExist:
-      newModel = ModelResult(model='svm', tfidf_unigram_acc='81.39711465451785', tfidf_unigram_time='0:01:10.873679', updated_at = datetime.now())
+      newModel = ModelResult(model='svm', updated_at = datetime.now())
       newModel.save()
       trained_model = ModelResult.objects.all()
       serializer =ModelResultSerializer(trained_model, many=True)
@@ -78,7 +78,7 @@ def train_model(request):
     #   serializer.save()
     #   return JsonResponse(serializer.data, status=201)
     serializer = ModelResultSerializer(model_result, data={
-      "model": 'svm', "tfidf_unigram_acc":'87.39711465451785', "tfidf_unigram_time": '0:01:10.873679', "updated_at" :datetime.now()
+      "model": 'svm', "updated_at" :datetime.now()
     })
     if serializer.is_valid():
       serializer.save()
