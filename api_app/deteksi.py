@@ -99,13 +99,13 @@ def process_data(algoritma, ekstraksi_fitur, dataset, stemmed_text_list):
     selected_algoritma = voting_classifier
     algm = 'vc'
   
-  if ekstraksi_fitur == 'tfidf-unigram':
+  if ekstraksi_fitur == 'tfidf_unigram':
     vec = TfidfVectorizer(ngram_range=(1, 1))
     ef = 'tfidf-unigram'
-  elif ekstraksi_fitur == 'tfidf-bigram':
+  elif ekstraksi_fitur == 'tfidf_bigram':
     vec = TfidfVectorizer(ngram_range=(1, 2))
     ef = 'tfidf-bigram'
-  elif ekstraksi_fitur == 'tfidf-trigram':
+  elif ekstraksi_fitur == 'tfidf_trigram':
     vec = TfidfVectorizer(ngram_range=(1, 3))
     ef = 'tfidf-trigram'
   
