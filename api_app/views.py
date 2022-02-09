@@ -61,48 +61,34 @@ def train_model(request):
   
   elif request.method == 'POST':
     data = JSONParser().parse(request)
-    # model_result = start_train_model(data['algoritma'], data['ekstraksi-fitur'])
+    if data['algoritma'] != 'svm' and data['algoritma'] != 'rf' and data['algoritma'] != 'vc':
+      return HttpResponse(content='algoritma tidak ditemukan di sistem', status=404)
     
-    try:
-      model_result = ModelResult.objects.get(model=data['algoritma'])
-      
-      
-    except ModelResult.DoesNotExist:
-      newModel = ModelResult(model='svm', updated_at = datetime.now())
-      newModel.save()
-      trained_model = ModelResult.objects.all()
-      serializer =ModelResultSerializer(trained_model, many=True)
-      return JsonResponse(serializer.data, safe = False)
+    model_result = start_train_model(data['algoritma'], data['ekstraksi-fitur'])
     
-    # if serializer.is_valid():
-    #   serializer.save()
-    #   return JsonResponse(serializer.data, status=201)
-    serializer = ModelResultSerializer(model_result, data={
-      "model": 'svm', "updated_at" :datetime.now()
+    model_result = ModelResult.objects.get(model=data['algoritma'])
+    # Update model
+    updated_model = ModelResultSerializer(model_result, data={
+      "model": data['algoritma'], 
+      "updated_at" :datetime.now()
     })
-    if serializer.is_valid():
-      serializer.save()
+    if updated_model.is_valid():
+      updated_model.save()
       trained_model = ModelResult.objects.all()
-      serializer =ModelResultSerializer(trained_model, many=True)
-      return JsonResponse(serializer.data, safe = False)
-    return JsonResponse(serializer.errors, status=400)
-  
-@csrf_exempt
-def update_model(request, pk):
-  try:
-    model_result = ModelResult.objects.get(pk=pk)
-  
-  except ModelResult.DoesNotExist:
-    return HttpResponse(status=404)
-  
-  if request.method == 'PUT':
-    data = JSONParser().parse(request)
-    serializer = ModelResultSerializer(model_result, data=data)
-    if serializer.is_valid():
-      serializer.save()
-      return JsonResponse(serializer.data)
-    return JsonResponse(serializer.errors, status=400)
+      object_result = {
+        'svm': {
+          'tfidf_unigram_acc': '3'
+        },
+        'rf': {
+          'tfidf_unigram_acc': '4'
+        },
+        'vc': {
+          'tfidf_unigram_acc': '5'
+        }
+      }
+      for model in trained_model:
+        object_result[model.model]['tfidf_unigram_acc'] =  model.tfidf_unigram_acc
+      return JsonResponse(object_result, status=200)
+    # End update model
     
-  elif request.method == 'DELETE':
-    model_result.delete()
-    return HttpResponse(status=204)
+    return JsonResponse(updated_model.errors, status=400)
