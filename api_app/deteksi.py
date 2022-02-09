@@ -66,7 +66,17 @@ def import_stemmed_dataset():
   stemmed_text_list = lines
   return stemmed_text_list
 
-def process_data(dataset, stemmed_text_list):
+def process_data(algoritma, ekstraksi_fitur, dataset, stemmed_text_list):
+  from sklearn.pipeline import make_pipeline
+  from sklearn.metrics import classification_report, confusion_matrix
+  from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+  from sklearn import svm
+  from sklearn.feature_extraction.text import TfidfVectorizer
+  from sklearn.metrics import confusion_matrix
+  from sklearn.metrics import accuracy_score, precision_score, recall_score
+  import time
+  import datetime
+  
   target = dataset['HS']
 
   for i in range(len(dataset)):
@@ -74,16 +84,58 @@ def process_data(dataset, stemmed_text_list):
       target[i] = 2
       
   x_train,x_test,y_train,y_test = train_test_split(stemmed_text_list, target, test_size=0.20, random_state=0)
-  return x_train
+  
+  svm = svm.SVC(probability=True)
+  random_forest = RandomForestClassifier()
+  voting_classifier = VotingClassifier(estimators=[('svm', svm), ('rf', random_forest)], voting='soft')
 
-def main():
+  if algoritma == 'svm':
+    selected_algoritma = svm
+    algm = 'svm'
+  elif algoritma == 'rf':
+    selected_algoritma = random_forest
+    algm = 'rf'
+  elif algoritma == 'vc':
+    selected_algoritma = voting_classifier
+    algm = 'vc'
+  
+  if ekstraksi_fitur == 'tfidf-unigram':
+    vec = TfidfVectorizer(ngram_range=(1, 1))
+    ef = 'tfidf-unigram'
+  elif ekstraksi_fitur == 'tfidf-bigram':
+    vec = TfidfVectorizer(ngram_range=(1, 2))
+    ef = 'tfidf-bigram'
+  elif ekstraksi_fitur == 'tfidf-trigram':
+    vec = TfidfVectorizer(ngram_range=(1, 3))
+    ef = 'tfidf-trigram'
+  
+  print('TRAINING MODEL')
+  print('ALGORITMA : ', algm)
+  print('EKSTRAKSI FITUR : ', ef)
+  model = make_pipeline(vec, selected_algoritma)
+  start = time.time()
+  model.fit(x_train, y_train.values.astype('U'))
+  stop = time.time()
+  model_prediction = model.predict(x_test)
+  ac = accuracy_score(y_test.values.astype('U'), model_prediction)
+  print(f"Training time: {stop - start}s")
+  timeInHour = str(datetime.timedelta(seconds=stop-start))
+  print('Time in hour: ', timeInHour)
+  print("Akurasi : ", ac * 100,'%')
+  print(classification_report(y_test.values.astype('U'), model_prediction))
+  return {
+    "model": algoritma,
+    "ekstraksi_fitur": ekstraksi_fitur,
+    "akurasi": f"{ac * 100}",
+    "durasi": timeInHour
+  }
+  
+def start_train_model(algoritma, ekstraksi_fitur):
   dataframe = import_dataset()
   preprocessed_data = preprocess_data(dataframe)
   normalized_text = normalize_text(preprocessed_data)
   # stemmed_data = stemming_data(normalized_text)
   stemmed_data = import_stemmed_dataset()
-  result = process_data(dataframe, stemmed_data)
-  print(len(result))
+  result = process_data(algoritma, ekstraksi_fitur, dataframe, stemmed_data)
+  return result
   
-
-main()
