@@ -1,12 +1,8 @@
 from dataclasses import fields
 from statistics import mode
 from rest_framework import serializers
-from .models import Article, ModelResult
+from .models import ModelResult
 
-class ArticleSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = Article
-    fields = ['id', 'title', 'author', 'date']
 
 class ModelResultSerializer(serializers.ModelSerializer):
   class Meta:

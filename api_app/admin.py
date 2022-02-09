@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Article, ModelResult
+from .models import ModelResult
 # Register your models here.
 
-admin.site.register(Article)
 admin.site.register(ModelResult)

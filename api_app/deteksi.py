@@ -68,12 +68,11 @@ def import_stemmed_dataset():
 
 def process_data(algoritma, ekstraksi_fitur, dataset, stemmed_text_list):
   from sklearn.pipeline import make_pipeline
-  from sklearn.metrics import classification_report, confusion_matrix
   from sklearn.ensemble import RandomForestClassifier, VotingClassifier
   from sklearn import svm
   from sklearn.feature_extraction.text import TfidfVectorizer
-  from sklearn.metrics import confusion_matrix
-  from sklearn.metrics import accuracy_score, precision_score, recall_score
+  from sklearn.model_selection import cross_val_score
+  from sklearn.metrics import accuracy_score, precision_score, recall_score, classification_report, confusion_matrix
   import time
   import datetime
   
@@ -85,8 +84,8 @@ def process_data(algoritma, ekstraksi_fitur, dataset, stemmed_text_list):
       
   x_train,x_test,y_train,y_test = train_test_split(stemmed_text_list, target, test_size=0.20, random_state=0)
   
-  svm = svm.SVC(probability=True)
-  random_forest = RandomForestClassifier()
+  svm = svm.SVC(probability=True, random_state=0)
+  random_forest = RandomForestClassifier(random_state=0)
   voting_classifier = VotingClassifier(estimators=[('svm', svm), ('rf', random_forest)], voting='soft')
 
   if algoritma == 'svm':
@@ -118,11 +117,14 @@ def process_data(algoritma, ekstraksi_fitur, dataset, stemmed_text_list):
   stop = time.time()
   model_prediction = model.predict(x_test)
   ac = accuracy_score(y_test.values.astype('U'), model_prediction)
+  # k_cross_val = 10
+  # train_ac = cross_val_score(model, x_train, y_train.values.astype('U'), cv=k_cross_val, scoring="accuracy", verbose=2)
+  # ac = train_ac.mean()
   print(f"Training time: {stop - start}s")
   timeInHour = str(datetime.timedelta(seconds=stop-start))
   print('Time in hour: ', timeInHour)
   print("Akurasi : ", ac * 100,'%')
-  print(classification_report(y_test.values.astype('U'), model_prediction))
+  # print(classification_report(y_test.values.astype('U'), model_prediction))
   return {
     "model": algoritma,
     "ekstraksi_fitur": ekstraksi_fitur,
