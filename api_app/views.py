@@ -80,9 +80,28 @@ def make_data_to_store(model, ekstraksi_fitur, acc, time):
 def train_model(request):
   
   if request.method == 'GET':
-    train_model = ModelResult.objects.all()
-    serializer =ModelResultSerializer(train_model, many=True)
-    return JsonResponse(serializer.data, safe = False)
+    trained_model = ModelResult.objects.all()
+    object_result = {
+      'svm': {
+        'tfidf_unigram_acc': ''
+      },
+      'rf': {
+        'tfidf_unigram_acc': ''
+      },
+      'vc': {
+        'tfidf_unigram_acc': ''
+      }
+    }
+    for model in trained_model:
+      object_result[model.model]['tfidf_unigram_acc'] =  model.tfidf_unigram_acc
+      object_result[model.model]['tfidf_bigram_acc'] =  model.tfidf_bigram_acc
+      object_result[model.model]['tfidf_trigram_acc'] =  model.tfidf_trigram_acc
+      object_result[model.model]['tfidf_unigram_time'] =  model.tfidf_unigram_time
+      object_result[model.model]['tfidf_bigram_time'] =  model.tfidf_bigram_time
+      object_result[model.model]['tfidf_trigram_time'] =  model.tfidf_trigram_time
+      object_result[model.model]['updated_at'] =  model.updated_at
+        
+    return JsonResponse(object_result, status=200)
   
   elif request.method == 'POST':
     data = JSONParser().parse(request)
