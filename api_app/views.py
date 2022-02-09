@@ -65,28 +65,27 @@ def train_model(request):
     
     try:
       model_result = ModelResult.objects.get(model=data['algoritma'])
-      # newModel = ModelResult(
-      #   model = model_result['model'],
-      #   tfidf_unigram_acc = model_result['ekstraksi_fitur'] == 'tfidf-unigram' ? model_result['akurasi'] : '',
-      #   tfidf_brigram_acc = model_result['ekstraksi_fitur'] == 'tfidf-bigram' ? model_result['akurasi'] : '',
-      #   tfidf_trigram_acc = model_result['ekstraksi_fitur'] == 'tfidf-trigram' ? model_result['akurasi'] : '',
-      #   tfidf_unigram_time = model_result['ekstraksi_fitur'] == 'tfidf-unigram' ? model_result['durasi'] : '',
-      #   tfidf_brigram_time = model_result['ekstraksi_fitur'] == 'tfidf-bigram' ? model_result['durasi'] : '',
-      #   tfidf_trigram_time = model_result['ekstraksi_fitur'] == 'tfidf-trigram' ? model_result['durasi'] : '',
-      #   updated_at = datetime.datetime.now()
-      # )
       
       
     except ModelResult.DoesNotExist:
       newModel = ModelResult(model='svm', tfidf_unigram_acc='81.39711465451785', tfidf_unigram_time='0:01:10.873679', updated_at = datetime.now())
       newModel.save()
-      return JsonResponse({"message": "successfully created model"}, status=201)
+      trained_model = ModelResult.objects.all()
+      serializer =ModelResultSerializer(trained_model, many=True)
+      return JsonResponse(serializer.data, safe = False)
     
     # if serializer.is_valid():
     #   serializer.save()
     #   return JsonResponse(serializer.data, status=201)
-    serializer = ModelResultSerializer(model_result)
-    return JsonResponse(serializer.data)
+    serializer = ModelResultSerializer(model_result, data={
+      "model": 'svm', "tfidf_unigram_acc":'87.39711465451785', "tfidf_unigram_time": '0:01:10.873679', "updated_at" :datetime.now()
+    })
+    if serializer.is_valid():
+      serializer.save()
+      trained_model = ModelResult.objects.all()
+      serializer =ModelResultSerializer(trained_model, many=True)
+      return JsonResponse(serializer.data, safe = False)
+    return JsonResponse(serializer.errors, status=400)
   
 @csrf_exempt
 def update_model(request, pk):
