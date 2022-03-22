@@ -84,8 +84,8 @@ def process_data(algoritma, ekstraksi_fitur, dataset, stemmed_text_list):
       
   x_train,x_test,y_train,y_test = train_test_split(stemmed_text_list, target, test_size=0.20, random_state=0)
   
-  svm = svm.SVC(probability=True, random_state=0)
-  random_forest = RandomForestClassifier(random_state=0)
+  svm = svm.SVC(probability=True)
+  random_forest = RandomForestClassifier()
   voting_classifier = VotingClassifier(estimators=[('svm', svm), ('rf', random_forest)], voting='soft')
 
   if algoritma == 'svm':
