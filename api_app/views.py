@@ -1,6 +1,7 @@
 from datetime import datetime
 from statistics import mode
 from unittest import result
+from urllib import response
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
@@ -99,3 +100,20 @@ def train_model(request):
     # End update model
     
     return JsonResponse(updated_model.errors, status=400)
+ 
+
+@csrf_exempt 
+def train_model_ten_times(request):
+  data = JSONParser().parse(request)
+  if data['algoritma'] != 'svm' and data['algoritma'] != 'rf' and data['algoritma'] != 'vc':
+    return HttpResponse(content='algoritma tidak ditemukan di sistem', status=404)
+  
+  
+  accurracy_array = []
+  for i in range(10):
+    trained_model_result = start_train_model(data['algoritma'], data['ekstraksi-fitur'])
+    accurracy_array.append(trained_model_result['akurasi'])
+  response = {
+    'result': accurracy_array
+  }
+  return JsonResponse(response, status=200)
