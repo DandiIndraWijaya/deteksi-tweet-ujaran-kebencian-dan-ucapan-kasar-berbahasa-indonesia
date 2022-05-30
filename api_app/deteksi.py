@@ -1,5 +1,7 @@
+from fileinput import filename
 import pandas as pd
 import nltk
+import os
 nltk.download('stopwords')
 nltk.download('wordnet')
 nltk.download('punkt')
@@ -9,9 +11,11 @@ from nltk.corpus import stopwords
 from numpy import array
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from sklearn.model_selection import train_test_split
+import joblib
+
 
 def import_dataset():
-  df = pd.read_csv(r'C:\Users\ACER\Documents\SKRIPSI\THIS\Dataset\data.csv',  encoding='latin-1')
+  df = pd.read_csv(os.path.abspath("api_app/data.csv"),  encoding='latin-1')
   return df
 
 def preprocess_data(df):
@@ -125,6 +129,9 @@ def process_data(algoritma, ekstraksi_fitur, dataset, stemmed_text_list):
   print('Time in hour: ', timeInHour)
   print("Akurasi : ", ac * 100,'%')
   # print(classification_report(y_test.values.astype('U'), model_prediction))
+  filename = algoritma + '_' + ekstraksi_fitur
+  joblib.dump(model, filename)
+  
   return {
     "model": algoritma,
     "ekstraksi_fitur": ekstraksi_fitur,

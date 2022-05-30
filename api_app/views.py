@@ -8,7 +8,7 @@ from .models import ModelResult
 from .serializers import ModelResultSerializer
 from django.views.decorators.csrf import csrf_exempt
 from .deteksi import start_train_model
-# Create your views here.
+from .test_model import start_test_model
 
 def make_data_to_store(model, ekstraksi_fitur, acc, time):
   if ekstraksi_fitur == 'tfidf_unigram':
@@ -96,6 +96,16 @@ def train_model(request):
         object_result[model.model]['updated_at'] =  model.updated_at
         
       return JsonResponse(object_result, status=200)
-    # End update model
     
     return JsonResponse(updated_model.errors, status=400)
+  
+@csrf_exempt
+def test_model(request):
+  if request.method == 'POST':
+    data = JSONParser().parse(request)
+    if data['algoritma'] != 'svm' and data['algoritma'] != 'rf' and data['algoritma'] != 'vc':
+      return HttpResponse(content='algoritma tidak ditemukan di sistem', status=404)
+    
+    result = start_test_model(data['tweet'], data['algoritma'], data['ekstraksi-fitur'])
+    return JsonResponse(result, status=200)
+    
